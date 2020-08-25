@@ -1,6 +1,6 @@
 '''
 Author: Imanpal Singh <imanpalsingh@gmail.com>
-Location:  src.Data
+Location:  src.data
 Date Created: 25-08-2020
 Date Modified: 25-08-2020
 '''
@@ -42,7 +42,7 @@ class Organizer:
     =======
 
     ```
-    >>>from Data.extract import Organizer
+    >>>from data.extract import Organizer
     >>>obj = Organizer(path = "dataset/")
 
     ```
@@ -82,7 +82,7 @@ class Organizer:
         =======
 
         ```
-        >>>from Data.extract import Organizer
+        >>>from data.extract import Organizer
         >>>obj = Organizer(path = "dataset/")
         >>>obj.start(output_dir="dataset/output/")
         ```
