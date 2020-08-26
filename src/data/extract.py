@@ -14,12 +14,9 @@ Change Logs
 
 Added additional metadata saving and renaming of images
 
-None
-
 '''
 
 import pandas as pd 
-from tqdm import tqdm
 import os
 from shutil import copyfile
 
@@ -46,7 +43,7 @@ class Organizer:
 
     -----------------------------------
 
-    `reaname_files`  : `bool`
+    `rename_files`  : `bool`
 
     Specifies if the files that are being copied (images) should be renamed.
     The images will be renamed for example as  `Covid191.png`
@@ -87,7 +84,7 @@ class Organizer:
 
         `output_dir` : `str`
 
-        Sepcifies the path to the folder in which different folders will be created based on the `finding` column inside `self.path/metadata.csv`
+        Specifies the path to the folder in which different folders will be created based on the `finding` column inside `self.path/metadata.csv`
         and inside those newly created folders, the images will be saved
 
         Example
