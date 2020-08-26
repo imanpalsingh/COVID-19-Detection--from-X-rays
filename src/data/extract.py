@@ -12,7 +12,7 @@ Change Logs
 
 1) 26-08-20
 
-Added additional metada saving and renaming of images
+Added additional metadata saving and renaming of images
 
 None
 
