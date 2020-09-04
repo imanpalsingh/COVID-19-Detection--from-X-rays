@@ -276,11 +276,27 @@ class TrainTest:
             train_files = files[:training_till]
             test_files = files[training_till:]
 
+            try:
+
+                os.mkdir(output_dir + '/testing/' + folder)
+        
+            except FileExistsError:
+
+                pass
+
+            try:
+
+                os.mkdir(output_dir + '/training/' + folder)
+        
+            except FileExistsError:
+
+                pass
+
             for train in train_files:
 
                 try:
                     
-                    copyfile(self.path + '/' + folder + '/' + train, output_dir + '/training/' + train)
+                    copyfile(self.path + '/' + folder + '/' + train, output_dir + '/training/' + folder + '/' + train)
                 
                 except FileNotFoundError:
 
@@ -290,7 +306,7 @@ class TrainTest:
 
                 try:
                     
-                    copyfile(self.path + '/' + folder + '/' + test, output_dir + '/testing/' + test)
+                    copyfile(self.path + '/' + folder + '/' + test, output_dir + '/testing/' + folder + '/' + test)
                 
                 except FileNotFoundError:
 
