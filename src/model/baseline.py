@@ -182,11 +182,11 @@ class Convolutional(keras.Model):
     def __init__(self):
 
         super(Convolutional,self).__init__()
-        self.input1 = keras.layers.InputLayer(input_shape=(13,13,3))
+        self.input1 = keras.layers.InputLayer(input_shape=(150,150,3))
         self.conv = keras.layers.Conv2D(64,(4,4),activation='relu')
         self.maxpool = keras.layers.MaxPool2D((4,4))
         self.flatten = keras.layers.Flatten()
-        self.dense = keras.layers.Dense(2,activation='sigmoid')
+        self.dense = keras.layers.Dense(17,activation='softmax')
     
     def call(self,input):
 
