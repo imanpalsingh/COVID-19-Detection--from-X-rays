@@ -1,4 +1,4 @@
-# COVID-19 Detection
+# COVID-19 Detection from X-rays
 ## Dataset
 
 
