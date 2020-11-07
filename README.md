@@ -1,10 +1,4 @@
-# COVID-19 Diagnosis Using Convolutional and Generative models
-
-## Introduction
-
-
-In this project I aim to develop a neural network architecture consisting of Convolutional Variational Autoencoder and Temporal Convolutional cluster for identifying COVID-19 from CT, X-ray and other demographics data.
-
+# COVID-19 Detection
 ## Dataset
 
 
