@@ -1,69 +1,46 @@
-'''
-Author: Imanpal Singh <imanpalsingh@gmail.com>
-Location:  src.data
-Date Created: 27-08-2020
-Date Modified: 04-09-2020
-'''
-
-'''
-
-Change Logs
-===========
-
-None
-
-'''
-
-
-from typing import Union
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras import models
+import os
 
-def create(train_dir : str, test_dir : str) -> Union[ImageDataGenerator,ImageDataGenerator] :
+def create(dir : str = "src/Dataset/traintest/") :
 
     '''
-
-    Function that returns test and training keras image generators extracted from the `train_dir` and `test_dir` respectively
+    Function returns train,val and test generators created on train test separated dataset
 
     Input
     =====
 
-    `train_dir` : `str`
-    
-    The direcotry which contains the training images (seperated by class as folders)
+    `dir` : the direcotry containing training and testing data 
 
-    ---------------
-
-    `test_dir` : `str`
-
-    The directory which contains the test set images (seperated by class as folders)
-
-    Example
-    ========
-    ```
-    >>>from data.generators import create
-    >>>train_gen,test_gen = create('dataset/training/','dataset/testing')
-
-    ```
     '''
-    train_gen = ImageDataGenerator(rescale=1./255,shear_range=0.2,zoom_range=0.25,horizontal_flip=True)
-    test_gen = ImageDataGenerator(rescale=1./255)
-
-    train_generator = train_gen.flow_from_directory(train_dir, target_size = (150,150), batch_size = 24, shuffle=True)
-    test_generator = test_gen.flow_from_directory(test_dir, target_size = (150,150), batch_size = 24, shuffle=False)
-
-    return train_generator,test_generator
+    train = ImageDataGenerator(rescale = 1.0/255,samplewise_center=True,
+        samplewise_std_normalization= True,
+        rotation_range = 15,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        fill_mode="nearest",
+        vertical_flip=True,
+        cval=0.0)
         
+    test = ImageDataGenerator(rescale = 1.0/255)
+
+    tr_gen = train.flow_from_directory(os.path.join(dir,'Train'),target_size=(512,512),batch_size=8,shuffle=True)
+    #va_gen = train.flow_from_directory(os.path.join(dir,'train'),target_size=(256,256),batch_size=64,shuffle=False,subset="validation")
+    te_gen = test.flow_from_directory(os.path.join(dir,'Test'),target_size=(512,512),batch_size=8,shuffle=False)
+
+    return tr_gen,te_gen
 
 
+def create_new(dir : str, model_save_dir : str = "src/model/saved/covid-19"):
 
+    test = ImageDataGenerator()
+    data = test.flow_from_directory(dir,target_size=(512,512),batch_size=1, shuffle=False, class_mode=None)
+    print("Success")
+    steps = len(data.filenames)
+    model = models.load_model(model_save_dir)
 
+    predictions = model.predict(data,steps=steps)
 
-
-
-
-
-        
-
-
-
-
+    return data.filenames, predictions
