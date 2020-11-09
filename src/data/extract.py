@@ -1,315 +1,146 @@
 '''
-Author: Imanpal Singh <imanpalsingh@gmail.com>
-Location:  src.data
-Date Created: 25-08-2020
-Date Modified: 01-09-2020
+File name : extract.py
+Location : src.data
+Author : Imanpal Singh <imanpalsingh@gmail.com>
 '''
 
 '''
+Change log:
 
-Change Logs
-===========
+04-11-20 :
 
-1) 01-09-20
+        1) Converted into binary classification task, only two folders will be created
+        Covid-19 and Safe
 
-Added Class to allow automated splitting of training and testing data for easier keras image integration  
 
-2) 27-08-20
+03-11-20 : 
 
-Changed class name Organizer to Raw
-Added class TrainValTest to split the images into folders of training and test
-
-2) 26-08-20
-
-Added additional metadata saving and renaming of images
+        1) Removed classes and organized into functions
 
 '''
 
 import pandas as pd 
+import pathlib
 import os
 from shutil import copyfile
-import glob
 from random import shuffle
 
-class Raw:
+
+def class_wise(input_dir : str = 'src/dataset/input/' , output_dir : str = 'src/dataset/classwise/', warnings : str = False) -> None :
 
     '''
 
-    For extracting different types of images from `path/images/` folder and arranging them in folders
-    based on their labels in `path/metadata.csv`
+    Function to extract raw images from the covid-19 dataset and organize them on the basis of class they belong to.
+    The dataset used is https://github.com/ieee8023/covid-chestxray-dataset and should be used without any modification to the
+    file organization
 
     Input
     =====
 
-    `path` : `str`
+    `input_dir` : directory to the repository of dataset
 
-    Specifies the path of the location of the dataset. The dataset should represent the same structure as of the repository 
-    `https://github.com/ieee8023/covid-chestxray-dataset` of the original dataset.
+    `output_dir` : directory where the organized and extracted images will be saved 
 
-    -----------------------------------
-
-    `images_only` : `bool`
-
-    Specifies whether to save the demographics given in `path/metadata.csv` along with the images if `False` or only images if `True`
-
-    -----------------------------------
-
-    `rename_files`  : `bool`
-
-    Specifies if the files that are being copied (images) should be renamed.
-    The images will be renamed for example as  `Covid191.png`
-
-
-    Example
-    =======
-
-    ```
-    >>>from data.extract import Organizer
-    >>>obj = Organizer(path = "dataset/")
-
-    ```
+    `warnings` : wether to display warning on file copy error or file doesn't exists as specified in output_dir/metadata.csv
 
     '''
 
-    def __init__(self,path: str, images_only : bool = True, rename_files : bool = True) -> None:
+    metadata = pd.read_csv(input_dir + 'metadata.csv')
+    X_ray_data = metadata[(metadata['modality'] == 'X-ray') & (metadata['view'] != 'L')]
 
+    pathlib.Path(output_dir).mkdir(parents=True,exist_ok=True)
+    pathlib.Path(os.path.join(output_dir,'Covid-19')).mkdir(exist_ok=True)
+    pathlib.Path(os.path.join(output_dir,'Safe')).mkdir(exist_ok=True)
     
-        if not os.path.isdir(path):
+    for row in X_ray_data.itertuples():
 
-            raise FileNotFoundError(f"The Directory '{path}' does not exist.")
-
-
-        self.path = path
-        self.images_only = images_only
-        self.rename_files = rename_files
-
-
-    def start(self,output_dir: str) -> None :
-
-        '''
-
-        Function to start the process of copying files to `output_dir`
-
-        Input
-        =====
-
-        `output_dir` : `str`
-
-        Specifies the path to the folder in which different folders will be created based on the `finding` column inside `self.path/metadata.csv`
-        and inside those newly created folders, the images will be saved
-
-        Example
-        =======
-
-        ```
-        >>>from data.extract import Raw
-        >>>obj = Raw(path = "dataset/")
-        >>>obj.start(output_dir="dataset/output/")
-        ```
-
-        '''
-
-        if not os.path.isdir(output_dir):
-
-            print(f"Warning! : The Directory '{output_dir}' does not exist and has been created.")
-            os.mkdir(output_dir)
-
-        metadata = pd.read_csv(self.path + 'metadata.csv')
-
-        classes = metadata['finding'].unique()
-        
-
-        for folder in classes:
-
-            '''
-            For each unique class given in the metadata.csv create a folder for the class if it doesn't exist
-
-            '''
+        try :
             
-            path = os.path.join(output_dir,folder)
-            try:
-                os.mkdir(path)
-
-            except FileExistsError:
-                pass
-
-            data = metadata[metadata['finding'] == folder]
-            files = data['filename']
-            locations = data['folder']
-
-
-            for index, (_file,location) in enumerate(zip(files,locations)):
-
-                '''
-                For each file that belongs to the class copy it from its current position to the newly created
-                folder for that class
-
-                '''
-                if self.rename_files:
-                        output_filename = folder + str(index) + os.path.splitext(_file)[1]
-                    
-                else:
-                        output_filename = _file 
+            if 'COVID-19' in row.finding:
                 
-                try:
-                    
-                    copyfile(self.path + '/' + location + '/' + _file, output_dir + '/' + folder + '/' + output_filename)
+                copyfile(os.path.join(input_dir,row.folder,row.filename), os.path.join(output_dir,'Covid-19',row.filename))
 
-                except FileNotFoundError:
+            elif 'No Finding' in row.finding :
+                
+                copyfile(os.path.join(input_dir,row.folder,row.filename), os.path.join(output_dir,'Safe',row.filename))
 
-                    print(f"Warning! : Skipping '{_file}' as it was not found at location '{location}'")
+        except FileNotFoundError:
 
-            
-            if not self.images_only:
+            if warnings:
 
-                data.to_csv(output_dir + '/' + folder + '/' + folder + '.csv', index = False)
-             
+                print(f"Warning! '{row.filename}' was not available locally.")
+        except:
 
-class TrainTest:
+            if warnings:
 
-    '''
-    Class for automated splitting of training and testing data into two different folders so that keras's ImageDataGenerator
-    can be easily applied.
-
-    Inputs
-    ======
-
-    `path` : `str`
-
-    Path were class separated images are stored. This is obtained by executing the `Raw` class first on the raw dataset. 
-
-    ------------------
-
-    `train_perc` : `float`
-
-    A number between 0 and 1 defining the percentage of total images to be used for training and rest for testing.
-
-    Note :  To avoid class left out problem percentage is calculated from each class separately so that every class 
-    is present in both training and test. However, still a class can be left out if the percentage is high and data is low enough
-
-    ---------------------
-
-    `shuffle` : `bool`
-
-    If to randomly select images for training and testing . If set to `False` first `total length x train_perc` images/data are selected
+                print("Error : Unknown error occurred while trying to copy file. Aborting")     
 
 
-    Example
-    =======
-
-    ```
-    >>>from data.extract import TrainTest
-    >>>obj = Test(path = "dataset/output/",train_perc=0.9)
-
-    ```
-    '''
-
-    def __init__(self, path, train_perc = 0.5, shuffle = False):
-
-        self.path = path
-        self.train_perc = train_perc
-        self.shuffle = shuffle
+def train_test_wise(input_dir : str = "src/dataset/classwise/", output_dir : str = "src/dataset/traintest/" , train_perc = 0.5, shuffle_files = True):
     
-    def start(self,output_dir):
+    '''
+    Function to split the classwise organized data into train and test
 
-        '''
+    Input
+    =====
 
-        Function to start the process of splitting of data into training and test set
+    `input_dir` : direcotry containing class wise organized dataset
 
-        Input
-        =====
+    `output_dir` : directory to contain the train and test split of dataset
 
-        `output_dir` : `str`
+    `train_perc` : the percentage of dataset to copy into the training folder. Rest will be copied to testing folder
 
-        Specifies the path to the folder in which two folders will be created `training` and `testing` 
-        and files will be copied to these two folders
+    `shuffle_file` : if to shuffle files while selecting them for training or testing folder. If set to `False`, always the 
+    first `train_perc`% of images will be selected for training
 
-        Example
-        =======
+    '''
+    folders = os.listdir(input_dir)
+    
+    pathlib.Path(output_dir).mkdir(parents=True,exist_ok=True)
+    pathlib.Path(os.path.join(output_dir,'Train')).mkdir(exist_ok=True)
+    pathlib.Path(os.path.join(output_dir,'Test')).mkdir(exist_ok=True)
+   
+    for folder in folders:
 
-        ```
-        >>>from data.extract import TrainTest
-        >>>obj = Test(path = "dataset/output/",train_perc=0.9)
-        >>>obj.start(output_dir="dataset/final/")
-        ```
+        files = os.listdir(os.path.join(input_dir,folder))
 
-        '''
+        if shuffle_files:
 
+            shuffle(files)
 
-        folders = os.listdir(self.path)
+        total_count = len(files)
 
-        if not os.path.isdir(output_dir):
+        training_till = int(total_count*train_perc)
 
-            print(f"Warning! : The Directory '{output_dir}' does not exist and has been created.")
-            os.mkdir(output_dir)
+        train_files = files[:training_till]
+        test_files = files[training_till:]
 
-        try:
-
-            os.mkdir(output_dir + '/training/')
-
-        except FileExistsError:
-
-            pass
+        pathlib.Path(os.path.join(output_dir,'train',folder)).mkdir(exist_ok=True)
+        pathlib.Path(os.path.join(output_dir,'test',folder)).mkdir(exist_ok=True)
         
-        try:
-
-            os.mkdir(output_dir + '/testing/')
-        
-        except FileExistsError:
-
-            pass
-
-
-        
-        for folder in folders:
-
-            files = os.listdir(self.path+folder)
-
-            if self.shuffle:
-
-                shuffle(files)
-
-            total_count = len(files)
-
-            training_till = int(total_count*self.train_perc)
-
-            train_files = files[:training_till]
-            test_files = files[training_till:]
+        for train in train_files:
 
             try:
-
-                os.mkdir(output_dir + '/testing/' + folder)
-        
-            except FileExistsError:
-
-                pass
-
-            try:
-
-                os.mkdir(output_dir + '/training/' + folder)
-        
-            except FileExistsError:
-
-                pass
-
-            for train in train_files:
-
-                try:
-                    
-                    copyfile(self.path + '/' + folder + '/' + train, output_dir + '/training/' + folder + '/' + train)
                 
-                except FileNotFoundError:
-
-                    print(f"Warning! : Skipping '{train}' as it was not found at location '{output_dir + '/' + folder + '/'}'")
-
-            for test in test_files:   
-
-                try:
-                    
-                    copyfile(self.path + '/' + folder + '/' + test, output_dir + '/testing/' + folder + '/' + test)
-                
-                except FileNotFoundError:
-
-                    print(f"Warning! : Skipping '{train}' as it was not found at location '{output_dir + '/' + folder + '/'}'")
-
+                copyfile(os.path.join(input_dir, folder, train), os.path.join(output_dir, 'train', folder, train))
             
+            except FileNotFoundError:
+
+                print(f"Warning! : Skipping '{train}' as it was not found at location '{output_dir + '/' + folder + '/'}'")
+
+        for test in test_files:   
+
+            try:
+                
+                copyfile(os.path.join(input_dir, folder, test), os.path.join(output_dir, 'test', folder, test))
+            
+            except FileNotFoundError:
+
+                print(f"Warning! : Skipping '{train}' as it was not found at location '{output_dir + '/' + folder + '/'}'")
+
+
+
+if __name__ == "__main__":
+
+    #class_wise()
+    train_test_wise(train_perc=0.5)
