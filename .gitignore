@@ -2,3 +2,4 @@ Dataset/
 pyvenv/
 .vscode/
 Demonstration/
+src/model/saved/*
