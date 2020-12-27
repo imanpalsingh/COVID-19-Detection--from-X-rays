@@ -1,3 +1,18 @@
+'''
+File name : main.py
+Location : src.gui
+Author : Imanpal Singh <imanpalsingh@gmail.com>
+'''
+'''
+Change log:
+
+28-12-20 :
+
+    1) Added Window header and border
+    2) Window is now dragable
+
+'''
+
 import sys
 from PyQt5.QtWidgets import qApp
 from PyQt5.QtWidgets import QApplication, QPushButton
@@ -12,31 +27,45 @@ from src.gui.home import Home
 from src.gui.analyze import Analyze
 
 import qdarkstyle
+from src.gui import stylesheet as css
 
 class Main(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(Main, self).__init__(*args, **kwargs)
         
-        self.cnormal = 'QMainWindow {border: 1px solid gray; border-radius : 4px; background-color : #202122;}'
-        
-        self.setWindowTitle("Covid-19 Detection from X-rays")
         self.setStyleSheet(qdarkstyle.load_stylesheet())
-        self.setStyleSheet(self.styleSheet() + self.cnormal)
-        
+        self.setStyleSheet(self.styleSheet() + css.cnormal)
+        self.setWindowTitle("Coronavirus Detection from X-rays using Neural Networks")
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(500, 250, 1000, 500)
-
+        self.offset = None
         self.loadHome()
+        
+        
         #self.loadAnalyze()
 
     def loadHome(self):
         self.home = Home()
         self.setCentralWidget(self.home)
+
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.offset = event.pos()
+        else:
+            super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self.offset is not None and event.buttons() == Qt.LeftButton:
+            self.move(self.pos() + event.pos() - self.offset)
+        else:
+            super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.offset = None
+        super().mouseReleaseEvent(event)
         
-    def loadAnalyze(self):
-        self.analyze = Analyze()
-        self.analyze.show()
 
 
     

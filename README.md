@@ -55,5 +55,5 @@ python -m src.model.cnn
 ```
 python -m src.gui.main
 ```
-![mainWindow](images//main.png)
+![mainWindow](images//GUI.png)
 

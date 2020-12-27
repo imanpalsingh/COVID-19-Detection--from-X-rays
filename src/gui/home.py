@@ -1,3 +1,18 @@
+'''
+File name : home.py
+Location : src.gui
+Author : Imanpal Singh <imanpalsingh@gmail.com>
+'''
+'''
+Change log:
+
+28-12-20 :
+
+    1) Added Window header and border
+    2) Window is now dragable
+
+'''
+
 from PyQt5.QtWidgets import qApp
 from PyQt5.QtWidgets import QApplication, QPushButton
 from PyQt5.QtWidgets import QLabel, QMainWindow, QToolBar, QFileDialog
@@ -7,6 +22,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from src.gui.analyze import Analyze
 import os
+from src.gui import stylesheet as css
 
 
 class Home(QWidget):
@@ -17,44 +33,7 @@ class Home(QWidget):
         self.folder = ''
         self.success = False
         
-        self.setStyleSheet('background-color : #202122;')
-
-        #CSS
-        self.cssDirText = ''' 
-        border-right : none;
-        border-top-right-radius: 0px;
-        border-bottom-right-radius: 0px; '''
-
-        self.cssHead = '''font-size : 35px;
-         border: 1px solid white;
-         border-top:hidden;
-         border-left:hidden;
-         border-right:hidden;
-         '''
-
-        self.cssDirButton = '''
-        background-color:transparent;
-        border : none;
-        font-size : 14px;
-        border : 1px solid white; 
-        border-top-left-radius: 0px;
-        border-bottom-left-radius: 0px;       
-         '''
-        
-        self.cssConform = '''
-        background-color:transparent;
-        border : none;
-        font-size : 14px;
-        border : 1px solid white;  
-         '''
-
-        self.cssExit = '''
-        background-color:transparent;
-        border : none;
-        font-size : 14px;
-        border : 1px solid white;   
-         '''
-
+        self.setStyleSheet('background-color : transparent; ')
         self.load_GUI()
 
     def load_GUI(self):
@@ -63,29 +42,40 @@ class Home(QWidget):
         self.directory_selector()
         self.conformation()
         self.credits()
+        self.window_header()
         
+
+
+    def window_header(self):
+        self.heading = QLabel(self)
+        self.heading.setText(" Coronavirus Detection from X-rays using Neural Networks")
+        self.heading.setMinimumHeight(45)
+        self.heading.move(0,0)
+        self.heading.setMinimumWidth(1000)
+        self.heading.setStyleSheet(css.windowHeader)
+
     def header(self):
 
         self.heading = QLabel(self)
-        self.heading.setText("Covid-19 Detection from X-rays")
-        self.heading.setMinimumHeight(100)
-        self.heading.move(220,40)
-        self.heading.setMinimumWidth(500)
-        self.heading.setFont(QFont('MonoSpace'))
-        self.heading.setStyleSheet(self.cssHead)
+        self.heading.setText("Data Extraction")
+        self.heading.setMinimumHeight(50)
+        self.heading.move(400,100)
+        self.heading.setMinimumWidth(180)
+
+        self.heading.setStyleSheet(css.head)
     
     def directory_selector(self):
 
         self.directory_text  = QLineEdit('', self)
-        self.directory_text.move(250,225)
+        self.directory_text.move(280,225)
         self.directory_text.setFixedSize(350,40)
-        self.directory_text.setStyleSheet(self.cssDirText + 'border-color:white;')
+        self.directory_text.setStyleSheet(css.dirText + 'border-color:white;')
         self.directory_text.setPlaceholderText("Enter Directory containing X-ray Images")
 
         self.directory_select = QPushButton('Browse', self, objectName='upload')
         self.directory_select.setFixedSize(5,40)
-        self.directory_select.move(600,225)
-        self.directory_select.setStyleSheet(self.cssDirButton)
+        self.directory_select.move(630,225)
+        self.directory_select.setStyleSheet(css.dirButton)
         self.directory_select.setCursor(Qt.PointingHandCursor)
         self.directory_select.clicked.connect(self.open_directory_select)
     
@@ -93,14 +83,14 @@ class Home(QWidget):
         self.analyze = QPushButton('Analyze', self, objectName='upload')
         self.analyze.setFixedSize(5,40)
         self.analyze.move(400,290)
-        self.analyze.setStyleSheet(self.cssConform)
+        self.analyze.setStyleSheet(css.conform)
         self.analyze.setCursor(Qt.PointingHandCursor)
         self.analyze.clicked.connect(self.analyze_direcotry)
         
         self.exit = QPushButton('Exit', self, objectName='exit')
         self.exit.setFixedSize(5,40)
         self.exit.move(500,290)
-        self.exit.setStyleSheet(self.cssConform)
+        self.exit.setStyleSheet(css.cexit)
         self.exit.clicked.connect(qApp.quit)
         self.exit.setCursor(Qt.PointingHandCursor)
     
@@ -121,12 +111,12 @@ class Home(QWidget):
 
         if self.directory_text.text() =='':
 
-            self.directory_text.setStyleSheet(self.cssDirText + 'border-color:red;')
-            self.directory_select.setStyleSheet(self.cssDirButton + 'border-color:red')
+            self.directory_text.setStyleSheet(css.dirText + 'border-color:red;')
+            self.directory_select.setStyleSheet(css.dirButton + 'border-color:red')
             
         else:
-            self.directory_text.setStyleSheet(self.cssDirText + 'border-color:white;')
-            self.directory_select.setStyleSheet(self.cssDirButton + 'border-color:white')
+            self.directory_text.setStyleSheet(css.dirText + 'border-color:white;')
+            self.directory_select.setStyleSheet(css.dirButton + 'border-color:white')
             self.success = True
             self._analyze()
             
@@ -135,8 +125,8 @@ class Home(QWidget):
         self.directory_text.clear()
         self.folder = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         self.directory_text.insert(self.folder)
-        self.directory_text.setStyleSheet(self.cssDirText + 'border-color:white;')
-        self.directory_select.setStyleSheet(self.cssDirButton + 'border-color:white')
+        self.directory_text.setStyleSheet(css.dirText + 'border-color:white;')
+        self.directory_select.setStyleSheet(css.dirButton + 'border-color:white')
 
 
 
@@ -150,8 +140,8 @@ class Home(QWidget):
 
             self.directory_text.clear()
             self.directory_text.insert("Directory Doesn't exist")
-            self.directory_text.setStyleSheet(self.cssDirText + 'border-color:red;')
-            self.directory_select.setStyleSheet(self.cssDirButton + 'border-color:red')
+            self.directory_text.setStyleSheet(css.dirText + 'border-color:red;')
+            self.directory_select.setStyleSheet(css.dirButton + 'border-color:red')
             print(self.directory_text.text())
             return
 
