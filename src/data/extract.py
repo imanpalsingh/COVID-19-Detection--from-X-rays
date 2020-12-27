@@ -7,6 +7,10 @@ Author : Imanpal Singh <imanpalsingh@gmail.com>
 '''
 Change log:
 
+28-12-20 :
+
+    1) More safe samples are manually added to avoid overfitting
+
 04-11-20 :
 
         1) Converted into binary classification task, only two folders will be created
@@ -26,7 +30,7 @@ from shutil import copyfile
 from random import shuffle
 
 
-def class_wise(input_dir : str = 'src/dataset/input/' , output_dir : str = 'src/dataset/classwise/', warnings : str = False) -> None :
+def class_wise(input_dir : str = 'src/dataset/covid/' , output_dir : str = 'src/dataset/classwise/', warnings : str = False) -> None :
 
     '''
 
@@ -60,7 +64,7 @@ def class_wise(input_dir : str = 'src/dataset/input/' , output_dir : str = 'src/
                 
                 copyfile(os.path.join(input_dir,row.folder,row.filename), os.path.join(output_dir,'Covid-19',row.filename))
 
-            elif 'No Finding' in row.finding :
+            else:
                 
                 copyfile(os.path.join(input_dir,row.folder,row.filename), os.path.join(output_dir,'Safe',row.filename))
 
@@ -143,4 +147,4 @@ def train_test_wise(input_dir : str = "src/dataset/classwise/", output_dir : str
 if __name__ == "__main__":
 
     #class_wise()
-    train_test_wise(train_perc=0.5)
+    #train_test_wise(train_perc=0.6)
